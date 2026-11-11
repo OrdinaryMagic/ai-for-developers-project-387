@@ -1,0 +1,35 @@
+# Version control / agent-state noise
+.git
+.gitignore
+.worktrees
+.github
+.opencode
+
+# Web frontend is built inside the image (Dockerfile → web-builder stage) and
+# served by the same service as the API (см. ADR-0006). Local build artifacts
+# and dependency trees must not leak into the build context.
+web/dist/
+web/.vite/
+web/node_modules/
+web/*.tsbuildinfo
+
+# Agent session logs (long-running throwaway writes; not part of the build).
+docs/agents/sessions
+
+# Build outputs and dependency trees.
+dist
+node_modules
+**/node_modules
+
+# Test code and fixtures (kept out of the runtime image).
+test
+**/test
+**/tests
+**/*.test.ts
+**/*.test.tsx
+
+# Logs, OS metadata, IDE scratch.
+*.log
+.DS_Store
+.idea
+.vscode

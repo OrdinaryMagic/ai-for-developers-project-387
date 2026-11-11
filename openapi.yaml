@@ -1,0 +1,396 @@
+openapi: 3.0.0
+info:
+  title: Booking API
+  description: 'Booking API: Cal.com-подобный сервис бронирования с одним предопределённым владельцем календаря.'
+  version: 0.0.0
+tags: []
+paths:
+  /bookings:
+    post:
+      operationId: Bookings_create
+      description: 'Создать бронирование на свободный слот. Возвращает `Booking` с HTTP 200. Доменные отказы приходят как `DomainError`: `MEETING_TYPE_NOT_FOUND` — 404, `SLOT_TAKEN` — 409, `OUTSIDE_WORKING_HOURS`/`OUTSIDE_WINDOW`/`MISMATCH_STEP` — 422. Слот, который уже начался, не бронируется: `OUTSIDE_WINDOW`. Идемпотентность: повтор того же `slotKey` возвращает `SLOT_TAKEN`.'
+      parameters: []
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Booking'
+        '404':
+          description: The server cannot find the requested resource.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DomainError'
+        '409':
+          description: The request conflicts with the current state of the server.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DomainError'
+        '422':
+          description: Client error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DomainError'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateBookingRequest'
+    get:
+      operationId: Bookings_list
+      description: Список предстоящих бронирований владельца. Без пагинации, ASC по `startsAt`, только будущие.
+      parameters: []
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Booking'
+  /config:
+    get:
+      operationId: Config_getConfig
+      description: Получить конфигурацию владельца и его правил.
+      parameters: []
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Configuration'
+  /meeting-types:
+    post:
+      operationId: MeetingTypes_create
+      description: Создать тип встречи. Возвращает `MeetingType` с HTTP 200. Длительность, не кратная `slotStepMinutes`, отклоняется с HTTP 422 и `DomainError` с кодом `INVALID_DURATION`.
+      parameters: []
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MeetingType'
+        '422':
+          description: Client error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DomainError'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateMeetingTypeRequest'
+    get:
+      operationId: MeetingTypes_list
+      description: Список всех типов встреч. Возвращается плоским массивом без пагинации.
+      parameters: []
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/MeetingType'
+  /meeting-types/{id}:
+    get:
+      operationId: MeetingTypes_getById
+      description: Получить конкретный тип встречи. Возвращает `MeetingType` с HTTP 200. Если тип не существует — HTTP 404 с `DomainError` и кодом `MEETING_TYPE_NOT_FOUND`.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MeetingType'
+        '404':
+          description: The server cannot find the requested resource.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DomainError'
+  /meeting-types/{id}/availability:
+    get:
+      operationId: MeetingTypes_availability
+      description: 'Получить свободные слоты типа встречи в текущем окне бронирования (14 дней). Возвращает `Availability` с HTTP 200. Слоты, которые уже начались, не отдаются: в сетку попадают только старты в будущем. Если тип встречи не существует — HTTP 404 с `DomainError` и кодом `MEETING_TYPE_NOT_FOUND`.'
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Availability'
+        '404':
+          description: The server cannot find the requested resource.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DomainError'
+components:
+  schemas:
+    Availability:
+      type: object
+      required:
+        - meetingTypeId
+        - windowStart
+        - windowEnd
+        - days
+      properties:
+        meetingTypeId:
+          type: string
+          description: UUID v4 идентификатор типа встречи.
+        windowStart:
+          type: string
+          description: Дата начала окна в формате ISO 8601 (по TZ владельца).
+        windowEnd:
+          type: string
+          description: Дата конца окна в формате ISO 8601, исключительно — полночь первого дня за пределами окна (по TZ владельца).
+        days:
+          type: array
+          items:
+            $ref: '#/components/schemas/AvailabilityDay'
+          description: Свободные слоты по дням, в TZ владельца.
+      description: Ответ с 14-дневной сеткой свободных слотов для типа встречи.
+    AvailabilityDay:
+      type: object
+      required:
+        - date
+        - slots
+      properties:
+        date:
+          type: string
+          description: Дата в формате ISO 8601 по TZ владельца (YYYY-MM-DD).
+        slots:
+          type: array
+          items:
+            type: string
+          description: Доступные старты в этом дне, ISO 8601 (datetime в TZ владельца).
+      description: День в окне с его свободными слотами.
+    Booking:
+      type: object
+      required:
+        - id
+        - meetingTypeId
+        - meetingTypeName
+        - guestName
+        - guestEmail
+        - startsAt
+        - endsAt
+      properties:
+        id:
+          type: string
+          maxLength: 36
+          description: UUID v4 идентификатор.
+        meetingTypeId:
+          type: string
+          description: UUID v4 идентификатор типа встречи, на который сделана запись.
+        meetingTypeName:
+          type: string
+          description: Имя типа встречи на момент бронирования (снимок).
+        guestName:
+          type: string
+          description: Имя гостя.
+        guestEmail:
+          type: string
+          description: Email гостя.
+        startsAt:
+          type: string
+          description: Время старта встречи в формате ISO 8601 в TZ владельца.
+        endsAt:
+          type: string
+          description: Время окончания встречи в формате ISO 8601 в TZ владельца.
+      description: Подтверждённое гостем бронирование слота.
+    Configuration:
+      type: object
+      required:
+        - owner
+        - windowDays
+        - slotStepMinutes
+        - workingDays
+        - workingHours
+      properties:
+        owner:
+          allOf:
+            - $ref: '#/components/schemas/Owner'
+          description: Имя и TZ владельца календаря.
+        windowDays:
+          type: integer
+          format: int32
+          description: 'Длина катящегося окна бронирования в календарных днях (v1: 14).'
+        slotStepMinutes:
+          type: integer
+          format: int32
+          description: 'Шаг между соседними возможными стартами слотов в минутах (v1: 30).'
+        workingDays:
+          type: array
+          items:
+            $ref: '#/components/schemas/WorkingDay'
+          minItems: 1
+          maxItems: 7
+          description: 'Рабочие дни владельца: уникальные ISO-дни недели 1–7, по умолчанию 1,2,3,4,5.'
+        workingHours:
+          allOf:
+            - $ref: '#/components/schemas/WorkingHours'
+          description: Рабочие часы владельца в его TZ.
+      description: 'Конфигурация владельца и его правил: TZ, рабочие дни и часы, шаг слотов, длина окна бронирования.'
+    CreateBookingRequest:
+      type: object
+      required:
+        - meetingTypeId
+        - startsAt
+        - guestName
+        - guestEmail
+      properties:
+        meetingTypeId:
+          type: string
+          description: UUID v4 идентификатор типа встречи.
+        startsAt:
+          type: string
+          description: Время старта слота в формате ISO 8601 в TZ владельца.
+        guestName:
+          type: string
+          maxLength: 120
+          description: Имя гостя, введённое в форме.
+        guestEmail:
+          type: string
+          maxLength: 254
+          description: Email гостя, введённый в форме.
+      description: Тело запроса на создание бронирования.
+    CreateMeetingTypeRequest:
+      type: object
+      required:
+        - name
+        - description
+        - durationMinutes
+      properties:
+        name:
+          type: string
+          maxLength: 120
+          description: Название типа встречи.
+        description:
+          type: string
+          maxLength: 2000
+          description: Описание типа встречи.
+        durationMinutes:
+          type: integer
+          format: int32
+          minimum: 1
+          maximum: 1440
+          description: Длительность встречи в минутах. Должна быть в [1, 1440] и кратна `slotStepMinutes` (30 по умолчанию). Не-кратное значение → 422 INVALID_DURATION.
+      description: Тело запроса на создание типа встречи.
+    DomainError:
+      type: object
+      required:
+        - statusCode
+        - code
+        - message
+      properties:
+        statusCode:
+          type: integer
+          format: int32
+          description: HTTP-код ответа (4xx или 5xx).
+        code:
+          allOf:
+            - $ref: '#/components/schemas/DomainErrorCode'
+          description: Стабильный код ошибки для разбора на клиенте.
+        message:
+          type: string
+          description: Человекочитаемое описание ситуации.
+      description: Тело ответа с доменной ошибкой.
+    DomainErrorCode:
+      type: string
+      enum:
+        - MEETING_TYPE_NOT_FOUND
+        - OUTSIDE_WORKING_HOURS
+        - OUTSIDE_WINDOW
+        - MISMATCH_STEP
+        - SLOT_TAKEN
+        - INVALID_DURATION
+      description: Стабильные коды доменных ошибок v1. Клиентский SDK разбирает их напрямую, без парсинга `message`.
+    MeetingType:
+      type: object
+      required:
+        - id
+        - name
+        - description
+        - durationMinutes
+      properties:
+        id:
+          type: string
+          maxLength: 36
+          description: UUID v4 идентификатор.
+        name:
+          type: string
+          maxLength: 120
+          description: Название типа встречи.
+        description:
+          type: string
+          maxLength: 2000
+          description: Описание встречи.
+        durationMinutes:
+          type: integer
+          format: int32
+          minimum: 1
+          maximum: 1440
+          description: 'Длительность встречи в минутах: положительное целое <= 1440 (сутки), кратное `slotStepMinutes`.'
+      description: Категория, которую владелец делает доступной для бронирования.
+    Owner:
+      type: object
+      required:
+        - name
+        - timezone
+      properties:
+        name:
+          type: string
+          maxLength: 120
+          description: Имя, отображается в UI владельца и гостя.
+        timezone:
+          type: string
+          description: IANA TZ владельца (например, `Europe/Moscow`).
+      description: Владелец календаря.
+    WorkingDay:
+      type: integer
+      format: int32
+      minimum: 1
+      maximum: 7
+      description: 'ISO-день недели: 1 — понедельник, 7 — воскресенье.'
+    WorkingHours:
+      type: object
+      required:
+        - start
+        - end
+      properties:
+        start:
+          type: string
+          description: Время начала рабочего дня в формате HH:MM (24-часовой).
+        end:
+          type: string
+          description: Время конца рабочего дня в формате HH:MM.
+      description: Рабочие часы владельца внутри суток, выражены в TZ владельца.
+servers:
+  - url: http://127.0.0.1:3000
+    description: Локальный dev-сервер
+    variables: {}

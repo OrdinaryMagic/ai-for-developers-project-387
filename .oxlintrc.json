@@ -1,0 +1,11 @@
+{
+  "$schema": "./node_modules/oxlint/configuration.schema.json",
+  "categories": {
+    "correctness": "error",
+    "suspicious": "warn"
+  },
+  "ignorePatterns": ["dist", "coverage", ".worktrees/"],
+  "rules": {
+    "oxc/no-async-endpoint-handlers": "off"
+  }
+}

@@ -1,0 +1,63 @@
+{
+  "name": "booking-api",
+  "version": "1.3.0",
+  "private": true,
+  "description": "Cal.com-like booking backend skeleton (Fastify + TypeScript)",
+  "type": "module",
+  "scripts": {
+    "dev": "tsx watch src/server.ts",
+    "build": "tsc -p tsconfig.json",
+    "start": "node dist/server.js",
+    "typecheck": "tsc --noEmit && tsc --noEmit -p tsconfig.railway.json",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "lint": "oxlint .",
+    "format": "oxfmt .",
+    "format:check": "oxfmt --check .",
+    "commitlint": "commitlint --edit",
+    "dev:web": "npm --prefix web run dev",
+    "build:web": "npm --prefix web run build",
+    "preview:web": "npm --prefix web run preview",
+    "typecheck:web": "npm --prefix web run typecheck",
+    "lint:web": "npm --prefix web run lint",
+    "test:web": "npm --prefix web run test",
+    "gen:sdk": "mise run gen:sdk",
+    "test:e2e": "E2E_REUSE_EXISTING_SERVER=0 playwright test",
+    "test:e2e:install": "playwright install --with-deps chromium",
+    "test:e2e:headed": "E2E_REUSE_EXISTING_SERVER=0 playwright test --headed",
+    "test:e2e:reuse": "E2E_REUSE_EXISTING_SERVER=1 playwright test"
+  },
+  "dependencies": {
+    "@fastify/sensible": "^6.0.7",
+    "@fastify/static": "^8.3.0",
+    "@fastify/swagger": "^9.9.3",
+    "@fastify/swagger-ui": "^6.1.2",
+    "@fastify/type-provider-typebox": "^6.3.0",
+    "@sinclair/typebox": "^0.34.52",
+    "fastify": "^5.12.7",
+    "luxon": "^3.7.2"
+  },
+  "devDependencies": {
+    "@commitlint/cli": "^21.2.4",
+    "@commitlint/config-conventional": "^21.2.4",
+    "@playwright/test": "^1.49.0",
+    "@types/js-yaml": "^4.0.9",
+    "@types/luxon": "^3.7.6",
+    "@types/node": "^26.6.6",
+    "@typespec/compiler": "^1.17.0",
+    "@typespec/http": "^1.17.0",
+    "@typespec/openapi3": "^1.17.0",
+    "@typespec/rest": "^0.87.0",
+    "js-yaml": "^5.5.0",
+    "orval": "8.46.0",
+    "oxfmt": "^0.75.0",
+    "oxlint": "^1.90.0",
+    "railway": "^3.16.0",
+    "tsx": "^4.23.15",
+    "typescript": "^7.0.2",
+    "vitest": "^5.0.5"
+  },
+  "engines": {
+    "node": ">=22.18.0"
+  }
+}

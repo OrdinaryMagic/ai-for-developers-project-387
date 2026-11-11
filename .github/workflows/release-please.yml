@@ -1,0 +1,36 @@
+# Google release-please action — see config in release-please-config.json
+# and version snapshot in .github/release-please-manifest.json.
+#
+# Trigger: push to `main`. Each merge into main re-runs release-please,
+# which opens or updates the Release PR. After the Release PR is merged,
+# the next push to main carries the new version commit and release-please
+# tags it + creates the GitHub Release.
+#
+# We removed the secondary `workflow_run` self-trigger because the first
+# run after merge of PR #23 (1 push to main) completed with 0 jobs and
+# failure (run 41728610838 in this repo) — GitHub Actions' self-loop
+# detector saw the workflow name listed in its own `workflow_run.workflows`
+# and aborted before any job was scheduled. Push-only trigger is the
+# canonical setup for release-please-action and is sufficient.
+name: release-please
+
+on:
+  push:
+    branches:
+      - main
+
+# release-please creates git tags, the GitHub Release, the Release PR and
+# its label/comment. Both write scopes are required.
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  release-please:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: googleapis/release-please-action@v5
+        with:
+          release-type: node
+          config-file: release-please-config.json
+          manifest-file: .github/release-please-manifest.json

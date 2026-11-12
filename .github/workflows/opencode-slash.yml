@@ -8,7 +8,7 @@
 #   /oc запусти скилл to-spec по обсуждению этого issue
 #
 # Требования:
-#   - секрет OPENCODE_API_KEY (или провайдер, настроенный для выбранной model);
+#   - секрет LITELLM_URL и LITELLM_API_KEY;
 #   - workflow срабатывает только для OWNER / MEMBER / COLLABORATOR.
 
 name: opencode
@@ -19,6 +19,12 @@ on:
   pull_request_review_comment:
     types: [created]
 
+permissions: {}
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.issue.number || github.event.pull_request.number }}
+  cancel-in-progress: false
+
 jobs:
   opencode:
     if: |
@@ -28,25 +34,15 @@ jobs:
        startsWith(github.event.comment.body, '/opencode')) &&
       contains(fromJson('["OWNER", "MEMBER", "COLLABORATOR"]'), github.event.comment.author_association)
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     permissions:
       id-token: write
       contents: read
       pull-requests: read
       issues: read
     steps:
-      - name: React with eyes
-        uses: actions/github-script@v7
-        with:
-          script: |
-            github.rest.reactions.createForIssueComment({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              comment_id: context.payload.comment.id,
-              content: 'eyes'
-            });
-
       - name: Checkout repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
         with:
           persist-credentials: false
 

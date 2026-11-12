@@ -12,5 +12,23 @@
         "disabled": false
       }
     }
+  },
+  "providers": {
+    "litellm": {
+      "name": "LiteLLM Proxy",
+      "env": ["LITELLM_API_KEY"],
+      "package": "@opencode/ai/providers/openai-compatible",
+      "settings": {
+        "baseURL": "{env:LITELLM_URL}"
+      },
+      "models": {
+        "MiniMax-M3": {
+          "name": "MiniMax-M3"
+        },
+        "MiniMax-M3.1-Flash-Preview": {
+          "name": "MiniMax-M3.1-Flash-Preview"
+        }
+      }
+    }
   }
 }

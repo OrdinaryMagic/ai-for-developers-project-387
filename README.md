@@ -140,6 +140,23 @@ Conventional Commits — формат `type(scope): subject` (feat, fix, chore, 
 
 Workflow `.github/workflows/ci.yml` запускается на каждый push (любая ветка и тег). Job `check` использует `jdx/mise-action@v5` для установки инструментов из `mise.toml` (Node 22.23.4, hk и т.д.), отдельно выполняет `npm ci` для root и `web/`, восстанавливает кэш `~/.cache/ms-playwright` и устанавливает Chromium через `npm run test:e2e:install`. После проверок свежести OpenAPI/SDK та же canonical-задача `mise run check` прогоняет весь gate, включая Playwright; отдельного e2e-job нет. При падении `playwright-report/` и `test-results/` загружаются как артефакты. Docker smoke-job имеет `needs: check`, поэтому стартует только после полного gate с браузерными сценариями. Стандартный Hexlet-чекер лежит отдельно в `hexlet-check.yml` и его трогать не нужно.
 
+### Вызов агента из комментариев
+
+Workflow `.github/workflows/opencode-slash.yml` запускает OpenCode по слеш-командам в комментариях к issue и review-комментариях PR:
+
+```
+/oc <prompt>
+/opencode <prompt>
+```
+
+Например:
+
+```
+/oc запусти скилл to-spec по обсуждению этого issue
+```
+
+Workflow срабатывает только для `OWNER`, `MEMBER` и `COLLABORATOR`. Для работы требуется секрет `OPENCODE_API_KEY` (или другой секрет, соответствующий провайдеру выбранной модели). Модель по умолчанию — `opencode/mimo-v2.6-flash-free`.
+
 ### Релизы
 
 Версия пакета `booking-api` в `package.json` и `CHANGELOG.md` в корне репозитория —

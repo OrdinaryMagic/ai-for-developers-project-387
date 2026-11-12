@@ -54,8 +54,10 @@ jobs:
       - name: Run opencode
         uses: anomalyco/opencode/github@latest
         env:
-          # Имя секрета зависит от провайдера, выбранного в model.
-          # Для opencode/mimo-v2.6-flash-free используется OPENCODE_API_KEY.
-          OPENCODE_API_KEY: ${{ secrets.OPENCODE_API_KEY }}
+          # LiteLLM proxy endpoint и ключ. Модель выбирается через vars.OPENCODE_MODEL;
+          # если не задана — используется litellm/MiniMax-M3.
+          # В secrets.LITELLM_URL должен быть полный URL с /v1, например:
+          LITELLM_URL: ${{ secrets.LITELLM_URL }}
+          LITELLM_API_KEY: ${{ secrets.LITELLM_API_KEY }}
         with:
-          model: opencode/mimo-v2.6-flash-free
+          model: ${{ vars.OPENCODE_MODEL || 'litellm/MiniMax-M3' }}

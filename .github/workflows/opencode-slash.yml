@@ -8,7 +8,10 @@
 #   /oc запусти скилл to-spec по обсуждению этого issue
 #
 # Требования:
-#   - секрет LITELLM_URL и LITELLM_API_KEY;
+#   - дефолтная модель opencode/glm-5.3-flash-free (каталог opencode zen) работает
+#     без секретов и без конфигурации провайдера;
+#   - секреты LITELLM_URL и LITELLM_API_KEY нужны только если переключить модель
+#     через vars.OPENCODE_MODEL на litellm/* (см. комментарий в шаге Run opencode);
 #   - workflow срабатывает только для OWNER / MEMBER / COLLABORATOR.
 
 name: opencode
@@ -49,12 +52,17 @@ jobs:
       - name: Run opencode
         uses: anomalyco/opencode/github@latest
         env:
-          # LiteLLM proxy endpoint и ключ. Модель выбирается через vars.OPENCODE_MODEL;
-          # если не задана — используется litellm/MiniMax-M3.
-          # В secrets.LITELLM_URL должен быть полный URL с /v1, например:
+          # Модель выбирается через vars.OPENCODE_MODEL; если не задана — используется
+          # бесплатная встроенная модель opencode/glm-5.3-flash-free (opencode zen),
+          # не требующая секретов и провайдера в конфиге.
+          # Секреты ниже нужны только для litellm/* через vars.OPENCODE_MODEL:
+          # в secrets.LITELLM_URL должен быть полный URL с /v1.
+          # ВАЖНО: action ставит opencode v1.19.x, который читает только V1-схему
+          # конфига (provider/npm/options). litellm/* заработает после возврата
+          # V1-формата в .opencode/opencode.json (revert 66315ed).
           LITELLM_URL: ${{ secrets.LITELLM_URL }}
           # OpenAI-compatible provider ожидает ключ в OPENAI_API_KEY.
           # Значение берётся из секрета LITELLM_API_KEY.
           OPENAI_API_KEY: ${{ secrets.LITELLM_API_KEY }}
         with:
-          model: ${{ vars.OPENCODE_MODEL || 'litellm/MiniMax-M3' }}
+          model: ${{ vars.OPENCODE_MODEL || 'opencode/glm-5.3-flash-free' }}

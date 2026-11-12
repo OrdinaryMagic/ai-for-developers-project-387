@@ -16,7 +16,6 @@
   "providers": {
     "litellm": {
       "name": "LiteLLM Proxy",
-      "env": ["LITELLM_API_KEY"],
       "package": "@opencode/ai/providers/openai-compatible",
       "settings": {
         "baseURL": "{env:LITELLM_URL}"

@@ -59,6 +59,8 @@ jobs:
           # В secrets.LITELLM_URL должен быть полный URL с /v1, например:
           # https://litellm.nanonsr.ru/v1
           LITELLM_URL: ${{ secrets.LITELLM_URL }}
-          LITELLM_API_KEY: ${{ secrets.LITELLM_API_KEY }}
+          # OpenAI-compatible provider ожидает ключ в OPENAI_API_KEY.
+          # Значение берётся из секрета LITELLM_API_KEY.
+          OPENAI_API_KEY: ${{ secrets.LITELLM_API_KEY }}
         with:
           model: ${{ vars.OPENCODE_MODEL || 'litellm/MiniMax-M3' }}

@@ -13,20 +13,19 @@
       }
     }
   },
-  "provider": {
+  "providers": {
     "litellm": {
-      "name": "LiteLLM",
-      "npm": "@ai-sdk/openai-compatible",
-      "options": {
+      "name": "LiteLLM Proxy",
+      "package": "@opencode/ai/providers/openai-compatible",
+      "settings": {
         "baseURL": "{env:LITELLM_URL}"
       },
-      "env": ["LITELLM_KEY"],
       "models": {
         "MiniMax-M3": {
           "name": "MiniMax-M3"
         },
-        "MiniMax-M3.1-Flash": {
-          "name": "MiniMax-M3.1-Flash"
+        "MiniMax-M3.1-Flash-Preview": {
+          "name": "MiniMax-M3.1-Flash-Preview"
         }
       }
     }

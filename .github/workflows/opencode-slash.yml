@@ -51,10 +51,10 @@ jobs:
         env:
           # LiteLLM proxy endpoint и ключ. Модель выбирается через vars.OPENCODE_MODEL;
           # если не задана — используется litellm/MiniMax-M3.
-          # В secrets.LITELLM_URL должен быть полный URL с /v1.
+          # В secrets.LITELLM_URL должен быть полный URL с /v1, например:
           LITELLM_URL: ${{ secrets.LITELLM_URL }}
-          # OpenAI-compatible provider получает ключ из env-переменной LITELLM_KEY.
+          # OpenAI-compatible provider ожидает ключ в OPENAI_API_KEY.
           # Значение берётся из секрета LITELLM_API_KEY.
-          LITELLM_KEY: ${{ secrets.LITELLM_API_KEY }}
+          OPENAI_API_KEY: ${{ secrets.LITELLM_API_KEY }}
         with:
           model: ${{ vars.OPENCODE_MODEL || 'litellm/MiniMax-M3' }}

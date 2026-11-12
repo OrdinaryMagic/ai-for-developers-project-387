@@ -149,13 +149,50 @@ Workflow `.github/workflows/opencode-slash.yml` запускает OpenCode по
 /opencode <prompt>
 ```
 
-Например:
+Workflow срабатывает только для `OWNER`, `MEMBER` и `COLLABORATOR`. Секрет
+`OPENCODE_API_KEY` (ключ opencode zen) — опционален: дефолтная бесплатная модель
+`opencode/glm-5.3-flash-free` работает без него; валидный ключ даёт полноценную
+zen-авторизацию и доступ к платным моделям каталога через `vars.OPENCODE_MODEL`.
+
+#### Вызов скиллов через /oc
+
+Скиллы вызываются формулировкой в теле `/oc`-комментария — тело комментария
+это промпт агента:
 
 ```
 /oc запусти скилл to-spec по обсуждению этого issue
+/oc прогони triage по всем open-issues
+/oc используй wayfinder, чтобы разбить эту карту на под-тикеты
+/oc используй domain-modeling — зафиксируй новый термин в GLOSSARY
 ```
 
-Workflow срабатывает только для `OWNER`, `MEMBER` и `COLLABORATOR`. Для работы требуется секрет `OPENCODE_API_KEY` (или другой секрет, соответствующий провайдеру выбранной модели). Модель по умолчанию — `opencode/mimo-v2.6-flash-free`.
+На runner'е агент автоматически читает `AGENTS.md` и `docs/agents/*`, поэтому
+трекерные и триажные соглашения применяются сами — пути к конфигам в промпте
+указывать не нужно.
+
+Список проектных скиллов:
+
+| Скилл                                                                               | Что делает                                                                                              |
+| ----------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------- |
+| `to-spec`                                                                           | спецификация из обсуждения issue → тикеты в трекер                                                      |
+| `implement-spec`                                                                    | реализация тикетов; манифест сессии в `docs/agents/sessions/`                                           |
+| `triage`                                                                            | триаж issues лейблами `needs-triage` / `needs-info` / `ready-for-agent` / `ready-for-human` / `wontfix` |
+| `wayfinder`                                                                         | карты + sub-тикеты, frontier-очередь, Blocking-зависимости                                              |
+| `domain-modeling` (вход через `/grill-with-docs`, `/improve-codebase-architecture`) | `GLOSSARY.md` и `docs/adr/` лениво                                                                      |
+
+Инфраструктура агента: трекер — GitHub Issues через `gh` CLI
+([docs/agents/issue-tracker.md](docs/agents/issue-tracker.md)), лейблы триажа
+([docs/agents/triage-labels.md](docs/agents/triage-labels.md)), доменная
+документация ([docs/agents/domain.md](docs/agents/domain.md)), история сессий
+([docs/agents/sessions/](docs/agents/sessions/)). Работу агент валидирует тем
+же gate `make check`, что гоняет CI (AGENTS.md rule #1).
+
+Универсальные скиллы из набора opencode: `grilling` (стресс-тест планов),
+`prototype` (прототип для проверки дизайн-гипотезы), `tdd` (красный-зелёный
+цикл), `research` (исследование по первоисточникам), `pr` (тело PR),
+`code-review` (ревью по стандартам и спеке), `diagnosing-bugs` (цикл
+диагностики), `release-notes` (релизные посты), `skill-creator` (создание и
+правка скиллов).
 
 ### Релизы
 

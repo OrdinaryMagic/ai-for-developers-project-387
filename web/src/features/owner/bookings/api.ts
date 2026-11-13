@@ -1,4 +1,10 @@
-import { bookingsList, configGetConfig, type Booking, type Configuration } from "@/api/sdk";
+import {
+  bookingsDelete,
+  bookingsList,
+  configGetConfig,
+  type Booking,
+  type Configuration,
+} from "@/api/sdk";
 import { isBooking } from "@/api/guards";
 
 export type { Booking, Configuration };
@@ -35,6 +41,12 @@ export async function listBookings(): Promise<Booking[]> {
     throw new Error("listBookings: пустое или невалидное тело ответа");
   }
   return data;
+}
+
+export async function cancelBooking(id: string): Promise<void> {
+  const result = await bookingsDelete(id);
+  const status: number = result.status;
+  if (status !== 204) throw new Error(`cancelBooking: HTTP ${status}`);
 }
 
 export async function getConfiguration(): Promise<Configuration> {

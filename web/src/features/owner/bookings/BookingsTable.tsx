@@ -1,3 +1,5 @@
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
 import {
   Table,
   TableBody,
@@ -12,9 +14,69 @@ import type { Booking } from "./api";
 
 interface BookingsTableProps {
   bookings: Booking[];
+  onCancel: (id: string) => Promise<void>;
 }
 
-export function BookingsTable({ bookings }: BookingsTableProps) {
+/** Действие отмены одной записи: первый клик — подтверждение, второй — удаление. */
+function BookingCancelAction({
+  bookingId,
+  onCancel,
+}: {
+  bookingId: string;
+  onCancel: (id: string) => Promise<void>;
+}) {
+  const [confirming, setConfirming] = useState(false);
+  const [pending, setPending] = useState(false);
+
+  if (!confirming) {
+    return (
+      <Button
+        variant="outline"
+        size="sm"
+        data-testid="booking-cancel-button"
+        onClick={() => setConfirming(true)}
+      >
+        Отменить
+      </Button>
+    );
+  }
+
+  const confirm = async () => {
+    setPending(true);
+    try {
+      await onCancel(bookingId);
+    } finally {
+      setPending(false);
+      setConfirming(false);
+    }
+  };
+
+  return (
+    <div data-testid="booking-cancel-confirm" className="flex items-center gap-2">
+      <span className="whitespace-nowrap text-sm">Отменить встречу?</span>
+      <Button
+        variant="destructive"
+        size="sm"
+        data-testid="booking-cancel-confirm-yes"
+        disabled={pending}
+        onClick={confirm}
+      >
+        Да, отменить
+      </Button>
+      <Button
+        variant="ghost"
+        size="sm"
+        data-testid="booking-cancel-confirm-no"
+        disabled={pending}
+        onClick={() => setConfirming(false)}
+      >
+        Оставить
+      </Button>
+    </div>
+  );
+}
+
+export function BookingsTable({ bookings, onCancel }: BookingsTableProps) {
   const { timezone } = useOwnerTimezone();
   return (
     <Table>
@@ -25,6 +87,7 @@ export function BookingsTable({ bookings }: BookingsTableProps) {
           <TableHead data-testid="bookings-table-head-guest-email">Email</TableHead>
           <TableHead data-testid="bookings-table-head-starts-at">Начало</TableHead>
           <TableHead data-testid="bookings-table-head-ends-at">Окончание</TableHead>
+          <TableHead data-testid="bookings-table-head-actions">Действия</TableHead>
         </TableRow>
       </TableHeader>
       <TableBody data-testid="bookings-table">
@@ -38,6 +101,9 @@ export function BookingsTable({ bookings }: BookingsTableProps) {
             </TableCell>
             <TableCell data-testid="booking-row-ends-at">
               {formatDateTime(b.endsAt, timezone)}
+            </TableCell>
+            <TableCell>
+              <BookingCancelAction bookingId={b.id} onCancel={onCancel} />
             </TableCell>
           </TableRow>
         ))}

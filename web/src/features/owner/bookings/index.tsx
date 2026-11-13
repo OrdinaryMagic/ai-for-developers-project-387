@@ -1,7 +1,7 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { BookingsTable } from "./BookingsTable";
-import { listBookings, type Booking } from "./api";
+import { cancelBooking, listBookings, type Booking } from "./api";
 
 export function BookingsPage() {
   const [bookings, setBookings] = useState<Booking[] | null>(null);
@@ -25,6 +25,17 @@ export function BookingsPage() {
     return () => {
       cancelled = true;
     };
+  }, []);
+
+  const handleCancel = useCallback(async (id: string) => {
+    try {
+      await cancelBooking(id);
+      const list = await listBookings();
+      setBookings(list);
+      setError(null);
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : String(err));
+    }
   }, []);
 
   return (
@@ -57,7 +68,9 @@ export function BookingsPage() {
         </Card>
       )}
 
-      {bookings !== null && bookings.length > 0 && <BookingsTable bookings={bookings} />}
+      {bookings !== null && bookings.length > 0 && (
+        <BookingsTable bookings={bookings} onCancel={handleCancel} />
+      )}
     </div>
   );
 }

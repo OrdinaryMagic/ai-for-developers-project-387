@@ -1,5 +1,21 @@
 # Changelog
 
+## [1.4.0](https://github.com/OrdinaryMagic/ai-for-developers-project-387/compare/v1.3.0...v1.4.0) (2026-11-13)
+
+
+### Features
+
+* **ci:** switch /oc slash commands to LiteLLM proxy with MiniMax models ([902d6bc](https://github.com/OrdinaryMagic/ai-for-developers-project-387/commit/902d6bc12baf80b042933a6aa201492d8bd7083d))
+
+
+### Bug Fixes
+
+* **ci:** default /oc model to free opencode/glm-5.3-flash-free ([5b12d80](https://github.com/OrdinaryMagic/ai-for-developers-project-387/commit/5b12d80d0bbd2ff6e86fafe63a7baa57616c3021))
+* **ci:** remove API_KEY env name from opencode config ([bda6ffb](https://github.com/OrdinaryMagic/ai-for-developers-project-387/commit/bda6ffb7e2cab7c2508886ec56625366cd07e560))
+* **ci:** remove invalid reactions permission from opencode workflow ([b6afa77](https://github.com/OrdinaryMagic/ai-for-developers-project-387/commit/b6afa77712a6605321e17f7ff53e79e0085112bc))
+* **ci:** restore issues and pull-requests read permissions ([687ecf7](https://github.com/OrdinaryMagic/ai-for-developers-project-387/commit/687ecf7519617663ae37188edef260ee9475b72e))
+* **ci:** use V1 provider format for LiteLLM MiniMax models ([b319434](https://github.com/OrdinaryMagic/ai-for-developers-project-387/commit/b319434d12ea86e8519dddb4d29334f4c7018140))
+
 ## [1.3.0](https://github.com/OrdinaryMagic/ai-for-developers-project-386/compare/v1.2.0...v1.3.0) (2026-11-06)
 
 

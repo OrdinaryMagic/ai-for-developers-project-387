@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.5.0](https://github.com/OrdinaryMagic/ai-for-developers-project-387/compare/v1.4.0...v1.5.0) (2026-11-13)
+
+
+### Features
+
+* **ci:** auto-triage workflow for opened issues ([c165319](https://github.com/OrdinaryMagic/ai-for-developers-project-387/commit/c1653197717e23c138c3bd311be464039f1806d0))
+
+
+### Bug Fixes
+
+* **ci:** give /oc workflow write access via built-in GH_TOKEN ([e52ed2f](https://github.com/OrdinaryMagic/ai-for-developers-project-387/commit/e52ed2f4a1ab4f3684d7b81fd1d43e052e78dc92))
+
 ## [1.4.0](https://github.com/OrdinaryMagic/ai-for-developers-project-387/compare/v1.3.0...v1.4.0) (2026-11-13)
 
 

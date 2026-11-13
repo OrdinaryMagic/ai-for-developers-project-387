@@ -6,7 +6,7 @@
 
 1. **Все проверки одной командой — `make check`** (= `mise run check`): backend typecheck → web typecheck → repo-wide lint → repo-wide format:check → backend unit-тесты → web unit-тесты → production-сборка web → Playwright e2e. Шаги выполняются последовательно с fail-fast; e2e поднимает собственные backend/Vite-серверы без reuse. CI гоняет ту же canonical-задачу на каждый push (`.github/workflows/ci.yml`). Не подменять отдельными npm-скриптами.
 2. **Формат коммитов — Conventional Commits.** Допустимые типы (по `@commitlint/config-conventional`): `feat`, `fix`, `docs`, `style`, `refactor`, `perf`, `test`, `build`, `ci`, `chore`, `revert`. Шаблон: `type(scope): subject`. Хук `commit-msg` (commitlint, `commitlint.config.js`) блокирует коммит при нарушении. Пропустить разово: `HK=0 git commit ...`.
-3. **Не править `.github/workflows/hexlet-check.yml`** — это Hexlet-платформа; баннер в файле запрещает. Свой CI в `.github/workflows/ci.yml`.
+3. **Не править `.github/workflows/hexlet-check.yml`** — это Hexlet-платформа; баннер в файле запрещает. Свой CI в `.github/workflows/ci.yml`. Автотриаж issues — `.github/workflows/auto-triage.yml` (opened/reopened, доверенные авторы, skip по state-лейблам, 1 параллельный прогон).
 4. **`tsc` не проверяет тесты.** `tsconfig.json` исключает `test/`; типы тестов — зона ответственности vitest.
 5. **Импорты в `src/` всегда с `.js`** (`import x from "./foo.js"`). `NodeNext` + ESM.
 6. **Демон `make daemon` требует один раз `mise use -g pitchfork`** — без этого шаг падает.

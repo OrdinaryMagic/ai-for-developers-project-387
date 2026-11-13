@@ -41,8 +41,8 @@ jobs:
     permissions:
       id-token: write
       contents: read
-      pull-requests: read
-      issues: read
+      pull-requests: write
+      issues: write
     steps:
       - name: Checkout repository
         uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
@@ -56,5 +56,9 @@ jobs:
           # обязателен, но даёт полноценную авторизацию zen и открывает платные
           # модели каталога через vars.OPENCODE_MODEL.
           OPENCODE_API_KEY: ${{ secrets.OPENCODE_API_KEY }}
+          # Встроенный GITHUB_TOKEN run'а: даёт gh CLI в агенте права на запись
+          # в issues/PR (создание sub-tickets, лейблы, комментарии). Job-level
+          # permissions выше выдают issues: write и pull-requests: write.
+          GH_TOKEN: ${{ github.token }}
         with:
           model: ${{ vars.OPENCODE_MODEL || 'opencode/glm-5.3-flash-free' }}

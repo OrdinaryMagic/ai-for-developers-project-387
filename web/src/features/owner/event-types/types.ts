@@ -51,6 +51,7 @@ export interface ErrorRouting {
 export const DOMAIN_ERROR_MESSAGES: Readonly<Record<DomainErrorCode, string>> = {
   INVALID_DURATION: "Длительность должна быть кратна шагу 30 минут (значение от 1 до 1440).",
   MEETING_TYPE_NOT_FOUND: "Тип встречи не найден.",
+  BOOKING_NOT_FOUND: "Бронирование не найдено.",
   OUTSIDE_WORKING_HOURS: "Слот вне рабочих часов владельца.",
   OUTSIDE_WINDOW: "Слот вне 14-дневного окна бронирования.",
   MISMATCH_STEP: "Старт слота не выровнен по шагу сетки.",

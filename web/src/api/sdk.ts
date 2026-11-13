@@ -151,6 +151,7 @@ export type DomainErrorCode = (typeof DomainErrorCode)[keyof typeof DomainErrorC
 
 export const DomainErrorCode = {
   MEETING_TYPE_NOT_FOUND: "MEETING_TYPE_NOT_FOUND",
+  BOOKING_NOT_FOUND: "BOOKING_NOT_FOUND",
   OUTSIDE_WORKING_HOURS: "OUTSIDE_WORKING_HOURS",
   OUTSIDE_WINDOW: "OUTSIDE_WINDOW",
   MISMATCH_STEP: "MISMATCH_STEP",
@@ -279,6 +280,43 @@ export const bookingsList = async (): Promise<bookingsListResponse> => {
 
   const data: bookingsListResponse["data"] = body ? JSON.parse(body) : {};
   return { data, status: res.status, headers: res.headers } as bookingsListResponse;
+};
+
+export type bookingsDeleteResponse204 = {
+  data: void;
+  status: 204;
+};
+
+export type bookingsDeleteResponse404 = {
+  data: DomainError;
+  status: 404;
+};
+
+export type bookingsDeleteResponseSuccess = bookingsDeleteResponse204 & {
+  headers: Headers;
+};
+export type bookingsDeleteResponseError = bookingsDeleteResponse404 & {
+  headers: Headers;
+};
+
+export type bookingsDeleteResponse = bookingsDeleteResponseSuccess | bookingsDeleteResponseError;
+
+export const getBookingsDeleteUrl = (id: string) => {
+  return `/api/bookings/${id}`;
+};
+
+/**
+ * Отменить бронирование (владелец): жёсткое удаление записи по Booking Identifier. Успех — 204 No Content без тела. Несуществующий идентификатор (в том числе уже удалённый) — 404 `DomainError` `BOOKING_NOT_FOUND`. Ограничений по времени нет: владелец может удалить любую запись, включая начавшуюся или прошедшую. Слот освобождается автоматически: `availability` и проверка `SLOT_TAKEN` считаются по существующим записям. Гость не уведомляется.
+ */
+export const bookingsDelete = async (id: string): Promise<bookingsDeleteResponse> => {
+  const res = await fetch(getBookingsDeleteUrl(id), {
+    method: "DELETE",
+  });
+
+  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+
+  const data: bookingsDeleteResponse["data"] = body ? JSON.parse(body) : undefined;
+  return { data, status: res.status, headers: res.headers } as bookingsDeleteResponse;
 };
 
 export type configGetConfigResponse200 = {

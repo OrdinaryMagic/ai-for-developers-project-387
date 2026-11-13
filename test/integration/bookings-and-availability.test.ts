@@ -393,6 +393,89 @@ describe("GET /bookings", () => {
   });
 });
 
+async function createBooking(server: FastifyInstance, meetingTypeId: string): Promise<string> {
+  const res = await server.inject({
+    method: "POST",
+    url: "/bookings",
+    payload: {
+      meetingTypeId,
+      startsAt: "2025-11-03T15:00:00+03:00",
+      guestName: "Иван",
+      guestEmail: "ivan@example.test",
+    },
+  });
+  expect(res.statusCode).toBe(200);
+  return res.json().id as string;
+}
+
+describe("DELETE /bookings/:id", () => {
+  it("удаляет существующую запись: 204 без тела, запись исчезает из GET /bookings", async () => {
+    const { server, meetingTypeId } = await makeApp();
+    const id = await createBooking(server, meetingTypeId);
+
+    const res = await server.inject({ method: "DELETE", url: `/bookings/${id}` });
+    expect(res.statusCode).toBe(204);
+    expect(res.body).toBe("");
+
+    const list = await server.inject({ method: "GET", url: "/bookings" });
+    expect(list.json()).toEqual([]);
+  });
+
+  it("возвращает 404 BOOKING_NOT_FOUND для несуществующего идентификатора", async () => {
+    const { server } = await makeApp();
+    const res = await server.inject({
+      method: "DELETE",
+      url: "/bookings/00000000-0000-4000-8000-000000000000",
+    });
+    expect(res.statusCode).toBe(404);
+    expect(res.json()).toMatchObject({
+      statusCode: 404,
+      code: "BOOKING_NOT_FOUND",
+    });
+  });
+
+  it("повторный DELETE той же записи — тоже 404 (идемпотентность не требуется)", async () => {
+    const { server, meetingTypeId } = await makeApp();
+    const id = await createBooking(server, meetingTypeId);
+
+    const first = await server.inject({ method: "DELETE", url: `/bookings/${id}` });
+    expect(first.statusCode).toBe(204);
+
+    const second = await server.inject({ method: "DELETE", url: `/bookings/${id}` });
+    expect(second.statusCode).toBe(404);
+    expect(second.json().code).toBe("BOOKING_NOT_FOUND");
+  });
+
+  it("после удаления слот освобождается: повторный POST успешен, слот виден в availability", async () => {
+    const { server, meetingTypeId } = await makeApp();
+    const id = await createBooking(server, meetingTypeId);
+
+    const deleted = await server.inject({ method: "DELETE", url: `/bookings/${id}` });
+    expect(deleted.statusCode).toBe(204);
+
+    const availability = await server.inject({
+      method: "GET",
+      url: `/meeting-types/${meetingTypeId}/availability`,
+    });
+    expect(availability.statusCode).toBe(200);
+    const day = availability.json().days.find((d: { date: string }) => d.date === "2025-11-03");
+    expect(day.slots).toContain("2025-11-03T15:00:00+03:00");
+
+    const rebook = await server.inject({
+      method: "POST",
+      url: "/bookings",
+      payload: {
+        meetingTypeId,
+        startsAt: "2025-11-03T15:00:00+03:00",
+        guestName: "Мария",
+        guestEmail: "maria@example.test",
+      },
+    });
+    expect(rebook.statusCode).toBe(200);
+    expect(rebook.json()).not.toMatchObject({ code: "SLOT_TAKEN" });
+  });
+});
+
 describe("GET /meeting-types/:id/availability", () => {
   it("возвращает 14-дневную сетку слотов без уже начавшихся", async () => {
     const { server, meetingTypeId } = await makeApp();

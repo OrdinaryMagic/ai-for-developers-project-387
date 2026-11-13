@@ -64,6 +64,7 @@ export const BOOKING_ERROR_MESSAGES: Readonly<Record<DomainError["code"], string
   OUTSIDE_WORKING_HOURS: "Этот слот вне рабочих часов владельца, выберите другой.",
   MISMATCH_STEP: "Старт слота не выровнен по шагу сетки, обновите страницу.",
   MEETING_TYPE_NOT_FOUND: "Тип встречи больше не доступен.",
+  BOOKING_NOT_FOUND: "Бронирование больше не существует, обновите страницу.",
   INVALID_DURATION: "Длительность встречи изменилась, обновите страницу.",
 };
 

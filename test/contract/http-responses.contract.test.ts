@@ -25,7 +25,7 @@ afterEach(async () => {
 
 function expectDocumentedJsonSchema(
   path: string,
-  method: "get" | "post",
+  method: "get" | "post" | "delete",
   statusCode: number,
   schemaName: string,
 ): void {
@@ -37,7 +37,7 @@ function expectDocumentedJsonSchema(
 
 function documentedJsonSchema(
   path: string,
-  method: "get" | "post",
+  method: "get" | "post" | "delete",
   statusCode: number,
 ): OpenApiSchema | undefined {
   return apiDoc.paths[path]?.[method]?.responses[String(statusCode)]?.content?.["application/json"]
@@ -195,5 +195,39 @@ describe("contract seam: HTTP responses ↔ openapi.yaml", () => {
       notFound.statusCode,
       "DomainError",
     );
+  });
+
+  it("DELETE /bookings/{id} документирует 204 без тела и доменный 404", async () => {
+    app = await buildApp({ config, clock });
+    const created = await app.inject({
+      method: "POST",
+      url: "/meeting-types",
+      payload: { name: "Stand-up", description: "", durationMinutes: 30 },
+    });
+    const meetingTypeId = created.json().id;
+    const booking = await app.inject({
+      method: "POST",
+      url: "/bookings",
+      payload: {
+        meetingTypeId,
+        startsAt: "2025-11-03T15:00:00+03:00",
+        guestName: "Guest",
+        guestEmail: "guest@example.test",
+      },
+    });
+    const bookingId = booking.json().id as string;
+
+    const success = await app.inject({ method: "DELETE", url: `/bookings/${bookingId}` });
+    expect(success.statusCode).toBe(204);
+    // 204 задокументирован без content — тело невозможнo по контракту.
+    expect(apiDoc.paths["/bookings/{id}"]?.delete?.responses["204"]?.content).toBeUndefined();
+
+    const notFound = await app.inject({
+      method: "DELETE",
+      url: "/bookings/00000000-0000-4000-8000-000000000000",
+    });
+    expect(notFound.statusCode).toBe(404);
+    expect(notFound.json()).toMatchObject({ statusCode: 404, code: "BOOKING_NOT_FOUND" });
+    expectDocumentedJsonSchema("/bookings/{id}", "delete", notFound.statusCode, "DomainError");
   });
 });

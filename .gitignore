@@ -9,10 +9,13 @@ coverage/
 .env.*
 !.env.example
 .mise.local.toml
-# `.opencode/` — локальное состояние агента (сессии, кэш), но проектная
-# MCP-конфигурация `.opencode/opencode.json` — версионируемый артефакт (#63).
+# `.opencode/` — локальное состояние агента (сессии, кэш), но проектные
+# артефакты версионируются: MCP-конфигурация `.opencode/opencode.json` (#63)
+# и вендоренные скиллы `.opencode/skills/` — они должны быть доступны
+# агенту на свежем CI-раннере без глобальной установки.
 .opencode/*
 !.opencode/opencode.json
+!.opencode/skills/
 .idea/
 *.tsbuildinfo
 # Playwright artifacts (см. тикет #34 → Wave C карты #26):

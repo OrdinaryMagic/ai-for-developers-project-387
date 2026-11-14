@@ -1,11 +1,12 @@
 import { useEffect, useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { BookingsTable } from "./BookingsTable";
-import { listBookings, type Booking } from "./api";
+import { cancelBooking, listBookings, type Booking } from "./api";
 
 export function BookingsPage() {
   const [bookings, setBookings] = useState<Booking[] | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [cancellingId, setCancellingId] = useState<string | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -26,6 +27,21 @@ export function BookingsPage() {
       cancelled = true;
     };
   }, []);
+
+  async function handleCancel(id: string): Promise<void> {
+    if (!window.confirm("Отменить это бронирование?")) {
+      return;
+    }
+    setCancellingId(id);
+    try {
+      await cancelBooking(id);
+      setBookings((current) => (current ?? []).filter((b) => b.id !== id));
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : String(err));
+    } finally {
+      setCancellingId(null);
+    }
+  }
 
   return (
     <div className="container py-8" data-testid="bookings-page">
@@ -57,7 +73,9 @@ export function BookingsPage() {
         </Card>
       )}
 
-      {bookings !== null && bookings.length > 0 && <BookingsTable bookings={bookings} />}
+      {bookings !== null && bookings.length > 0 && (
+        <BookingsTable bookings={bookings} cancellingId={cancellingId} onCancel={handleCancel} />
+      )}
     </div>
   );
 }

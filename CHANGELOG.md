@@ -1,5 +1,14 @@
 # Changelog
 
+## [1.6.1](https://github.com/OrdinaryMagic/ai-for-developers-project-387/compare/v1.6.0...v1.6.1) (2026-11-14)
+
+
+### Bug Fixes
+
+* **ci:** авторевью для PR агента, отсечка release-please на триггере ([cabd4f3](https://github.com/OrdinaryMagic/ai-for-developers-project-387/commit/cabd4f35195231036e5922bedee1ad2969e22453))
+* **ci:** запрет external_directory для opencode-агента ([f328d7b](https://github.com/OrdinaryMagic/ai-for-developers-project-387/commit/f328d7b08c451c39b3c523c250430edd1ff059ab))
+* **ci:** тайм-ауты агентных воркфлоу обратно на 15 минут ([62b25e1](https://github.com/OrdinaryMagic/ai-for-developers-project-387/commit/62b25e1949c83e7f2889f231940d877fb50be5a3))
+
 ## [1.6.0](https://github.com/OrdinaryMagic/ai-for-developers-project-387/compare/v1.5.0...v1.6.0) (2026-11-14)
 
 

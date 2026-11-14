@@ -51,12 +51,16 @@ _Избегать_: «slot validation», «boundary check».
 _Избегать_: «settings», «preferences», «tenant config».
 
 **Domain Error (доменная ошибка)**:
-Структурированная ошибка уровня домена: HTTP-`statusCode` (4xx/5xx), стабильная `code`-строка (`SLOT_TAKEN`, `MEETING_TYPE_NOT_FOUND`, `OUTSIDE_WORKING_HOURS`, `OUTSIDE_WINDOW`, `MISMATCH_STEP`), человекочитаемое `message`. Коды клиентский SDK обрабатывает напрямую, без парсинга `message`.
+Структурированная ошибка уровня домена: HTTP-`statusCode` (4xx/5xx), стабильная `code`-строка (`SLOT_TAKEN`, `MEETING_TYPE_NOT_FOUND`, `BOOKING_NOT_FOUND`, `OUTSIDE_WORKING_HOURS`, `OUTSIDE_WINDOW`, `MISMATCH_STEP`), человекочитаемое `message`. Коды клиентский SDK обрабатывает напрямую, без парсинга `message`.
 _Избегать_: «application error»; «validation error» — это уровень Fastify-schema, отдельный слой.
 
 **Booking Identifier (идентификатор бронирования)**:
 Непрозрачный UUID v4, выдаваемый сервером при создании бронирования. Не используется в качестве pretty-URL; человекочитаемые URL строит фронтенд.
 _Избегать_: «booking id», «reservation code», «slug».
+
+**Отмена бронирования (владельцем)**:
+Действие Owner на странице «Бронирования» (`/admin/bookings`): жёсткое удаление Booking по Booking Identifier через `DELETE /bookings/{id}` (HTTP 204; несуществующий идентификатор — 404 `BOOKING_NOT_FOUND`, идемпотентность повтора не требуется). После отмены слот освобождается автоматически: availability и проверка `SLOT_TAKEN` считаются по существующим записям. Ограничений по времени нет — владелец может удалить любую запись, включая начавшуюся или прошедшую. Гость не уведомляется; история отмен не сохраняется; статуса `cancelled` в модели Booking нет. Статус поля Booking при этом не вводится — отменённая запись перестаёт существовать.
+_Избегать_: «cancel/reschedule» (это отмена гостем, out of scope v1), «soft delete», «archived booking».
 
 **Idempotency Policy (политика повторов)**:
 Решение о том, как обрабатывается повторный `POST /bookings`. В v1 — без заголовка `Idempotency-Key` и без серверного кэша ответов: повторный запрос с тем же `slotKey` возвращает `409 SLOT_TAKEN`. Совпадает с правилом «для двух запросов, пришедших одновременно» из ТЗ.

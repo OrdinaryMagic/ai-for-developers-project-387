@@ -4,6 +4,7 @@
  */
 export type DomainErrorCode =
   | "MEETING_TYPE_NOT_FOUND"
+  | "BOOKING_NOT_FOUND"
   | "OUTSIDE_WORKING_HOURS"
   | "OUTSIDE_WINDOW"
   | "MISMATCH_STEP"
@@ -26,6 +27,10 @@ const DEFINITIONS = {
   MEETING_TYPE_NOT_FOUND: {
     statusCode: 404,
     defaultMessage: "Запрашиваемый тип встречи не найден.",
+  },
+  BOOKING_NOT_FOUND: {
+    statusCode: 404,
+    defaultMessage: "Запрашиваемое бронирование не найдено.",
   },
   OUTSIDE_WORKING_HOURS: {
     statusCode: 422,

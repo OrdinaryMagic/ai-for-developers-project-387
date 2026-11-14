@@ -500,6 +500,84 @@ describe("GET /meeting-types/:id/availability", () => {
   });
 });
 
+describe("DELETE /bookings/:id", () => {
+  it("удаляет существующую запись: 204 без тела, запись исчезает из списка, слот освобождается", async () => {
+    const { server, meetingTypeId } = await makeApp();
+    const created = await server.inject({
+      method: "POST",
+      url: "/bookings",
+      payload: {
+        meetingTypeId,
+        startsAt: "2025-11-03T15:00:00+03:00",
+        guestName: "Иван",
+        guestEmail: "ivan@example.test",
+      },
+    });
+    expect(created.statusCode).toBe(200);
+    const id = created.json().id as string;
+
+    const del = await server.inject({ method: "DELETE", url: `/bookings/${id}` });
+    expect(del.statusCode).toBe(204);
+    expect(del.body).toBe("");
+
+    const list = await server.inject({ method: "GET", url: "/bookings" });
+    expect(list.json()).toHaveLength(0);
+
+    // Слот снова в сетке availability.
+    const availability = await server.inject({
+      method: "GET",
+      url: `/meeting-types/${meetingTypeId}/availability`,
+    });
+    expect(availability.json().days[0].slots).toContain("2025-11-03T15:00:00+03:00");
+
+    // Повторная запись на тот же слот проходит штатно (не 409 SLOT_TAKEN).
+    const rebook = await server.inject({
+      method: "POST",
+      url: "/bookings",
+      payload: {
+        meetingTypeId,
+        startsAt: "2025-11-03T15:00:00+03:00",
+        guestName: "Пётр",
+        guestEmail: "petr@example.test",
+      },
+    });
+    expect(rebook.statusCode).toBe(200);
+    expect(rebook.json().guestName).toBe("Пётр");
+  });
+
+  it("возвращает 404 BOOKING_NOT_FOUND для несуществующего идентификатора", async () => {
+    const { server } = await makeApp();
+    const res = await server.inject({
+      method: "DELETE",
+      url: "/bookings/00000000-0000-0000-0000-000000000000",
+    });
+    expect(res.statusCode).toBe(404);
+    expect(res.json()).toMatchObject({ statusCode: 404, code: "BOOKING_NOT_FOUND" });
+  });
+
+  it("повторный DELETE той же записи — тоже 404 (идемпотентность не требуется)", async () => {
+    const { server, meetingTypeId } = await makeApp();
+    const created = await server.inject({
+      method: "POST",
+      url: "/bookings",
+      payload: {
+        meetingTypeId,
+        startsAt: "2025-11-03T15:00:00+03:00",
+        guestName: "Иван",
+        guestEmail: "ivan@example.test",
+      },
+    });
+    const id = created.json().id as string;
+
+    const first = await server.inject({ method: "DELETE", url: `/bookings/${id}` });
+    expect(first.statusCode).toBe(204);
+
+    const second = await server.inject({ method: "DELETE", url: `/bookings/${id}` });
+    expect(second.statusCode).toBe(404);
+    expect(second.json().code).toBe("BOOKING_NOT_FOUND");
+  });
+});
+
 describe("Конфликт слотов разной длительности", () => {
   it("возвращает 409 SLOT_TAKEN при частичном наложении (60 мин 15:00 vs 30 мин 15:30)", async () => {
     const { server } = await makeApp();

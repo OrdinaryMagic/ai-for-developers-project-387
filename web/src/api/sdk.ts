@@ -151,6 +151,7 @@ export type DomainErrorCode = (typeof DomainErrorCode)[keyof typeof DomainErrorC
 
 export const DomainErrorCode = {
   MEETING_TYPE_NOT_FOUND: "MEETING_TYPE_NOT_FOUND",
+  BOOKING_NOT_FOUND: "BOOKING_NOT_FOUND",
   OUTSIDE_WORKING_HOURS: "OUTSIDE_WORKING_HOURS",
   OUTSIDE_WINDOW: "OUTSIDE_WINDOW",
   MISMATCH_STEP: "MISMATCH_STEP",
@@ -279,6 +280,43 @@ export const bookingsList = async (): Promise<bookingsListResponse> => {
 
   const data: bookingsListResponse["data"] = body ? JSON.parse(body) : {};
   return { data, status: res.status, headers: res.headers } as bookingsListResponse;
+};
+
+export type bookingsDelResponse204 = {
+  data: void;
+  status: 204;
+};
+
+export type bookingsDelResponse404 = {
+  data: DomainError;
+  status: 404;
+};
+
+export type bookingsDelResponseSuccess = bookingsDelResponse204 & {
+  headers: Headers;
+};
+export type bookingsDelResponseError = bookingsDelResponse404 & {
+  headers: Headers;
+};
+
+export type bookingsDelResponse = bookingsDelResponseSuccess | bookingsDelResponseError;
+
+export const getBookingsDelUrl = (id: string) => {
+  return `/api/bookings/${id}`;
+};
+
+/**
+ * Отменить бронирование по идентификатору (владелец). Запись удаляется жёстко, слот автоматически снова становится доступным: availability и проверка SLOT_TAKEN считаются по существующим записям. Возвращает HTTP 204 без тела. Если бронирования не существует — в том числе при повторном DELETE того же идентификатора — HTTP 404 с `DomainError` и кодом `BOOKING_NOT_FOUND`. Ограничений по времени нет: владелец — доверенная роль, может удалить любую запись, включая начавшуюся или прошедшую.
+ */
+export const bookingsDel = async (id: string): Promise<bookingsDelResponse> => {
+  const res = await fetch(getBookingsDelUrl(id), {
+    method: "DELETE",
+  });
+
+  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+
+  const data: bookingsDelResponse["data"] = body ? JSON.parse(body) : undefined;
+  return { data, status: res.status, headers: res.headers } as bookingsDelResponse;
 };
 
 export type configGetConfigResponse200 = {

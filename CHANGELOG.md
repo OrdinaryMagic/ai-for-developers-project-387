@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.6.0](https://github.com/OrdinaryMagic/ai-for-developers-project-387/compare/v1.5.0...v1.6.0) (2026-11-14)
+
+
+### Features
+
+* **ci:** авторевью PR по критериям REVIEW.md и шаблон PR ([a4c0108](https://github.com/OrdinaryMagic/ai-for-developers-project-387/commit/a4c01087baac8fc1fa24a48752c2ca5f5df591f8))
+
+
+### Bug Fixes
+
+* **ci:** тайм-ауты агентных воркфлоу до 40 минут ([a0cdafc](https://github.com/OrdinaryMagic/ai-for-developers-project-387/commit/a0cdafc54a7be1b215fda1391f20eaaa65307169))
+
 ## [1.5.0](https://github.com/OrdinaryMagic/ai-for-developers-project-387/compare/v1.4.0...v1.5.0) (2026-11-13)
 
 

@@ -149,7 +149,7 @@ Workflow `.github/workflows/opencode-slash.yml` запускает OpenCode по
 /opencode <prompt>
 ```
 
-Workflow срабатывает только для `OWNER`, `MEMBER` и `COLLABORATOR`. Секрет
+Workflow срабатывает только для `OWNER`, `MEMBER` и `COLLABORATOR`. Перед вызовом модели воркфлоу предустанавливает окружение (mise, root/web-зависимости, Chromium Playwright — по образцу `ci.yml`), поэтому агент не тратит прогон на установку тулчейна; тайм-аут job'а — 30 минут. Секрет
 `OPENCODE_API_KEY` (ключ opencode zen) — опционален: дефолтная бесплатная модель
 `opencode/glm-5.3-flash-free` работает без него; валидный ключ даёт полноценную
 zen-авторизацию и доступ к платным моделям каталога через `vars.OPENCODE_MODEL`.

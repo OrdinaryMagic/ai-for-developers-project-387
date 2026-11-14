@@ -54,6 +54,15 @@ Single-context: `GLOSSARY.md` в корне репозитория, `docs/adr/` 
 
 Каждая сессия `@implement-spec` оставляет manifest в `docs/agents/sessions/YYYY-MM-DD-<cart-id>-<short>.md` (индекс в `README.md`). В манифесте — какие sub-tickets закрыты, non-obvious drift (отклонения от спецификации с reasons), code-review findings и post-merge fixups с SHA. Это помогает следующему агенту в новой session бегло понять, что выкатили, без чтения всего `git log`. Cart-closed комментарий в GitHub issue остаётся canonical short-trace; манифест в `docs/` — это длинная версия с drift и reasoning.
 
+### Бюджет прогона агента на CI
+
+`/oc`-воркфлоу (`.github/workflows/opencode-slash.yml`) предустанавливает окружение ДО вызова модели: mise (Node, hk), root/web `npm ci`, Chromium Playwright. Агенту на runner'е:
+
+- **НЕ устанавливать тулчейн** — mise/npm/браузер уже готовы, команды работают из PATH;
+- exploration-отчёты — краткие: ответ субагента попадает в контекст основного агента целиком, длинные эссе сжигают бюджет на пережёвывание;
+- gate на каждом тикете реализации — `typecheck + lint + unit`-тесты; полный `make check` (со сборкой web и Playwright) — один раз в конце, после всех тикетов;
+- тайм-аут job'а — 30 минут: полный `implement-spec` на free-модели упирается в этот лимит, поэтому любая установка ПО — потерянный тикет.
+
 ### Docker
 
 После wave-1 карты #42 backend живёт как Docker image: `docker build -t booking-api .` и `docker run --env PORT=…`. Базовые команды и ENV contract (`PORT` из env, `HOST=0.0.0.0` внутри контейнера, `GET /` и `GET /health` как smoke-эндпоинты) — в [README.md → ## Docker](./README.md#docker). Реализует тикеты #43 (Dockerfile + .dockerignore) и #45 (документация) карты #42.

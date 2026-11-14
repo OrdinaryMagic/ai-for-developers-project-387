@@ -15,7 +15,7 @@
 # Ограничения:
 #   - глобальный concurrency-группа auto-triage: максимум 1 параллельный
 #     прогон, остальные события ждут в очереди (cancel-in-progress: false);
-#   - timeout-minutes: 10 на job.
+#   - timeout-minutes: 40 на job.
 
 name: auto-triage
 
@@ -40,7 +40,7 @@ jobs:
       !contains(toJson(github.event.issue.labels.*.name), '"ready-for-human"') &&
       !contains(toJson(github.event.issue.labels.*.name), '"wontfix"')
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 40
     permissions:
       id-token: write
       contents: read

@@ -37,7 +37,9 @@ jobs:
        startsWith(github.event.comment.body, '/opencode')) &&
       contains(fromJson('["OWNER", "MEMBER", "COLLABORATOR"]'), github.event.comment.author_association)
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    # Полный прогон агента (например, implement-spec с make check-gate'ом)
+    # реально занимает до 40 минут; 15 минут обрывали stream посреди работы.
+    timeout-minutes: 40
     permissions:
       id-token: write
       contents: read

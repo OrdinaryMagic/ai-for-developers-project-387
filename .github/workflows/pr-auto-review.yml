@@ -9,10 +9,14 @@
 # ревью не блокирует merge (информативный вердикт для мейнтейнера).
 #
 # Фильтры (jobs.review.if):
-#   - только доверенные авторы: OWNER / MEMBER / COLLABORATOR;
-#   - боты пропускаются (user.type != 'Bot') — release-please PR не ревьюятся;
+#   - доверенные авторы: OWNER / MEMBER / COLLABORATOR, а также PR самого
+#     CI-агента (opencode-agent[bot]) — они как раз больше всего нуждаются
+#     в независимой проверке;
 #   - draft-PR не ревьюятся до готовности;
 #   - PR с лейблом no-auto-review пропускается (ручной секьюз мейнтейнера).
+#   PR release-please отсечены раньше — на уровне триггера branches-ignore:
+#   иначе бот github-actions[bot] (association=CONTRIBUTOR) порождает run'ы,
+#   требующие ручного approval, и воркфлоу мусорит action_required/failure.
 #
 # Пределы запусков до вызова модели:
 #   - paths-ignore на триггере: PR с изменениями только в markdown-документации
@@ -36,6 +40,11 @@ on:
     paths-ignore:
       - "**.md"
       - "docs/**"
+    # PR release-please не ревьюятся и не порождают run'ов вообще: иначе
+    # бот github-actions[bot] (author_association=CONTRIBUTOR) требует
+    # ручного approval и воркфлоу мусорит action_required-прогонами.
+    branches-ignore:
+      - "release-please--**"
 
 permissions: {}
 
@@ -46,8 +55,8 @@ concurrency:
 jobs:
   review:
     if: |
-      contains(fromJson('["OWNER", "MEMBER", "COLLABORATOR"]'), github.event.pull_request.author_association) &&
-      github.event.pull_request.user.type != 'Bot' &&
+      (contains(fromJson('["OWNER", "MEMBER", "COLLABORATOR"]'), github.event.pull_request.author_association) ||
+       github.event.pull_request.user.login == 'opencode-agent[bot]') &&
       github.event.pull_request.draft == false &&
       !contains(toJson(github.event.pull_request.labels.*.name), '"no-auto-review"')
     runs-on: ubuntu-latest

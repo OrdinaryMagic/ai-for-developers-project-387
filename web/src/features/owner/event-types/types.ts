@@ -55,4 +55,5 @@ export const DOMAIN_ERROR_MESSAGES: Readonly<Record<DomainErrorCode, string>> = 
   OUTSIDE_WINDOW: "Слот вне 14-дневного окна бронирования.",
   MISMATCH_STEP: "Старт слота не выровнен по шагу сетки.",
   SLOT_TAKEN: "Слот уже занят.",
+  BOOKING_NOT_FOUND: "Бронирование не найдено.",
 };

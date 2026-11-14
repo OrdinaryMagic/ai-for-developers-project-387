@@ -65,6 +65,7 @@ export const BOOKING_ERROR_MESSAGES: Readonly<Record<DomainError["code"], string
   MISMATCH_STEP: "Старт слота не выровнен по шагу сетки, обновите страницу.",
   MEETING_TYPE_NOT_FOUND: "Тип встречи больше не доступен.",
   INVALID_DURATION: "Длительность встречи изменилась, обновите страницу.",
+  BOOKING_NOT_FOUND: "Бронирование не найдено — обновите страницу.",
 };
 
 export function BookingForm({ meetingType, slot, onBooked, onCancel }: BookingFormProps) {

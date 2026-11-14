@@ -4,10 +4,13 @@ using TypeSpec.Http;
 
 namespace BookingApi;
 
-@doc("Стабильные коды доменных ошибок v1. Клиентский SDK разбирает их напрямую, без парсинга `message`.")
-enum DomainErrorCode {
-  @doc("Запрашиваемый тип встречи не существует.")
-  MeetingTypeNotFound: "MEETING_TYPE_NOT_FOUND",
+  @doc("Стабильные коды доменных ошибок v1. Клиентский SDK разбирает их напрямую, без парсинга `message`.")
+  enum DomainErrorCode {
+    @doc("Запрашиваемый тип встречи не существует.")
+    MeetingTypeNotFound: "MEETING_TYPE_NOT_FOUND",
+
+    @doc("Запрашиваемое бронирование не существует (или уже удалено).")
+    BookingNotFound: "BOOKING_NOT_FOUND",
 
   @doc("Запрашиваемый старт не попадает в рабочие часы владельца.")
   OutsideWorkingHours: "OUTSIDE_WORKING_HOURS",

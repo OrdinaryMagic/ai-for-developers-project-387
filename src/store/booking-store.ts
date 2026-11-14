@@ -151,6 +151,30 @@ export class BookingStore {
   }
 
   /**
+   * Жёстко удаляет запись по Booking Identifier под тем же локом, что
+   * сериализует `book`/`list`/`availability`. Возвращает `true`, если запись
+   * существовала и удалена; `false` — если её нет (в том числе после
+   * предыдущего удаления — идемпотентность повторного DELETE не требуется).
+   *
+   * Слот после удаления освобождается сам: и `availability`, и проверка
+   * `SLOT_TAKEN` в `book` считаются по существующим записям. Ограничений по
+   * времени нет — владелец может удалить запись с любым `startsAt`.
+   */
+  async delete(id: string): Promise<boolean> {
+    const release = await this.gate.acquire();
+    try {
+      const index = this.bookings.findIndex((b) => b.id === id);
+      if (index === -1) {
+        return false;
+      }
+      this.bookings.splice(index, 1);
+      return true;
+    } finally {
+      release();
+    }
+  }
+
+  /**
    * Список предстоящих бронирований (`startsAt >= now`), отсортированных
    * хронологически. Снимок берётся под локом, чтобы конкурентный `book`
    * не застал нас на полпути.

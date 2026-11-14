@@ -161,6 +161,7 @@ export const typesManifest: Record<string, ManifestSchema> = {
     kind: "enum",
     values: [
       "MEETING_TYPE_NOT_FOUND",
+      "BOOKING_NOT_FOUND",
       "OUTSIDE_WORKING_HOURS",
       "OUTSIDE_WINDOW",
       "MISMATCH_STEP",

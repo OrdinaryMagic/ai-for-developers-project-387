@@ -22,7 +22,7 @@
 #   - concurrency-группа на PR с cancel-in-progress: true: новый push
 #     отменяет ревью по устаревшему SHA — в PR не остаётся ревью неактуального
 #     состояния кода;
-#   - timeout-minutes: 40 на job;
+#   - timeout-minutes: 15 на job;
 #   - permissions: только чтение кода и запись ревью в PR.
 
 name: pr-auto-review
@@ -51,7 +51,7 @@ jobs:
       github.event.pull_request.draft == false &&
       !contains(toJson(github.event.pull_request.labels.*.name), '"no-auto-review"')
     runs-on: ubuntu-latest
-    timeout-minutes: 40
+    timeout-minutes: 15
     permissions:
       id-token: write
       contents: read
